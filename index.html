@@ -3,11 +3,50 @@
 <head>
 <meta charset="utf-8">
 <title>MalphasWats - Ludum Dare 26</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<script src="lib/jaws.js"></script>
+
+<script src="game.js"></script>
+
+<script id="FirebugLite" src="https://getfirebug.com/firebug-lite-debug.js#startOpened" firebuglite="4"></script>
+
+<style type="text/css">
+
+    body
+    {
+        background: black;
+        color: white;
+    }
+
+    canvas
+    {
+        display:block;
+        margin:0 auto;
+        
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+    }
+</style>
+    
+
 </head>
 
 <body>
 
+<canvas width="820" height="480" style="background:white;"></canvas>
 
+<h1>MalphasWats - Ludum Dare #26</h1>
+
+
+<script>
+    jaws.onload = function()
+    {
+        //jaws.assets.bust_cache=true
+        
+        jaws.assets.add(["graphics/easel.png", "graphics/bryan.png"])
+        jaws.start(Easel, {fps:120})
+    }
+</script>
 
 </body>
 </html>

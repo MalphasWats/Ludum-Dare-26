@@ -1,21 +1,129 @@
 /* MalphasWats - Ludum Dare 26 */
 
-function Game()
-{
+var renown = 0
+var target_renown = (Math.floor(Math.random() * 10) + 1) *10
+var cash = 500
 
+var days_left = 31
+
+function Renown()
+{
+    var sidebar, sidebar_context, sidebar_sprite
+    
+    var actions
+    
     this.setup = function()
     {
-    
+        sidebar = document.createElement('canvas')
+        sidebar.width = 120
+        sidebar.height = 350
+        sidebar_context = sidebar.getContext('2d')
+        
+        sidebar_context.fillStyle = "#dddddd"
+        sidebar_context.fillRect(0,0, sidebar.width, sidebar.height)
+        
+        sidebar_context.textAlign  = "Left"
+        sidebar_context.fillStyle  = "black"
+        sidebar_context.font       = "bold 20px Terminal"
+        
+        sidebar_context.fillText("Renown",15, 115)
+        sidebar_context.fillText("Cash",15, 195)
+        sidebar_context.fillText("Days Left",15, 275)
+        
+        var bryan = new jaws.Sprite({image: "graphics/bryan.png", x:5, y:5, scale_image:4})
+        
+        sidebar_context.drawImage(bryan.image, 30, 15, 64, 64)
+        
+        sidebar_sprite = new jaws.Sprite({image: sidebar, x:20, y:20})
+        
+        actions = new jaws.SpriteList()
+        
+        var button = document.createElement('canvas')
+        button.width = 350
+        button.height = 60
+        var context = button.getContext('2d')
+        
+        context.fillStyle = "#cdcdcd"
+        context.fillRect(0,0, button.width, button.height)
+        
+        context.textAlign  = "Left"
+        context.fillStyle  = "black"
+        context.font       = "bold 20px Terminal"
+        
+        context.fillText("Take a Commission", 120, 35)
+        
+        actions.push(new jaws.Sprite({image: button, x:200, y:40}))
+        
+        
+        var button = document.createElement('canvas')
+        button.width = 350
+        button.height = 60
+        var context = button.getContext('2d')
+        
+        context.fillStyle = "#cdcdcd"
+        context.fillRect(0,0, button.width, button.height)
+        
+        context.textAlign  = "Left"
+        context.fillStyle  = "black"
+        context.font       = "bold 20px Terminal"
+        
+        context.fillText("Hold an Exhibition", 120, 35)
+        
+        actions.push(new jaws.Sprite({image: button, x:200, y:130}))
+        
+        
+        var button = document.createElement('canvas')
+        button.width = 350
+        button.height = 60
+        var context = button.getContext('2d')
+        
+        context.fillStyle = "#cdcdcd"
+        context.fillRect(0,0, button.width, button.height)
+        
+        context.textAlign  = "Left"
+        context.fillStyle  = "black"
+        context.font       = "bold 20px Terminal"
+        
+        context.fillText("Guerilla Graffitto", 120, 35)
+        
+        actions.push(new jaws.Sprite({image: button, x:200, y:220}))
     }
     
     this.update = function()
     {
-    
+        sidebar_context.save()
+        sidebar_context.fillStyle = "white"
+        sidebar_context.fillRect(10, 120, 100, 50)
+        
+        sidebar_context.fillRect(10, 200, 100, 50)
+        
+        sidebar_context.fillRect(10, 280, 100, 50)
+        
+        sidebar_context.textAlign  = "center"
+        sidebar_context.fillStyle  = "black"
+        sidebar_context.font       = "bold 30px Terminal"
+        
+        sidebar_context.fillText(renown+'/'+target_renown,60, 160)
+        sidebar_context.fillText(days_left, 60, 320)
+        sidebar_context.font       = "bold 25px Terminal"
+        sidebar_context.fillText('£'+cash,60, 240)
+        
+        
+        sidebar_context.restore()
+        
+        days_left -= 1
+        
+        if(days_left == 0)
+        {
+            //lost :(
+        }
     }
     
     this.draw = function()
     {
-    
+        jaws.clear()
+        sidebar_sprite.draw()
+        actions.draw()
     }
 
 }
@@ -24,13 +132,18 @@ function Easel()
 {
 
     var painting, painting_context, painting_sprite
-    var easel
+    var easel, paints
     var sidebar, sidebar_context, sidebar_sprite
     
     var target_coverage
     
+    var current_colour
+    
+    var fps
+    
     this.setup = function()
     {
+        fps =document.getElementById("fps")
         jaws.context.mozImageSmoothingEnabled = false;
         easel = new jaws.Sprite({image:"graphics/easel.png", x:150, y:20, scale_image:5})
     
@@ -48,7 +161,8 @@ function Easel()
             
             for(var i=0 ; i < painting_data.length / 4 ; i++)
             {
-                if (painting_data[(i*4)] > 0) //only checks red!
+                if (painting_data[(i*4)+3] > 0 &&
+                    (painting_data[(i*4)]+painting_data[(i*4)+1]+painting_data[(i*4)+2])<765)
                 {
                     coloured_pixels += 1
                 }
@@ -78,25 +192,55 @@ function Easel()
         
         sidebar_sprite = new jaws.Sprite({image: sidebar, x:20, y:20})
         
-        jaws.clear()
-        easel.draw()
         
-        target_coverage = 17
-    }
-    
-    this.update = function()
-    {
-        if (jaws.pressed("left_mouse_button"))
-        {
-            painting_context.save()
-            painting_context.translate(-painting_sprite.x, -painting_sprite.y)
-            painting_context.beginPath()
-            painting_context.fillStyle = "red"
-            painting_context.arc(jaws.mouse_x, jaws.mouse_y, 4, 0, 2 * Math.PI, false)
-            painting_context.fill()
-            painting_context.restore()
-        }
-        else
+        var paint_sheet = new jaws.SpriteSheet({image: "graphics/paint.png", 
+                                       frame_size: [16,16], 
+                                       
+                                       scale_image: 4})
+                                       
+        paints = new jaws.SpriteList()
+        
+        var paint = new jaws.Sprite({image: paint_sheet.frames[0], x:jaws.width-50, y:60, anchor: "center"})
+        paint.onFrame = paint_sheet.frames[1]
+        paint.offFrame = paint_sheet.frames[0]
+        paint.colour = "white"
+        
+        paints.push( paint )
+        
+        var paint = new jaws.Sprite({image: paint_sheet.frames[3], x:jaws.width-50, y:130, anchor: "center"})
+        paint.onFrame = paint_sheet.frames[3]
+        paint.offFrame = paint_sheet.frames[2]
+        paint.colour = "red"
+        
+        current_colour = "red"
+        
+        paints.push( paint )
+        
+        var paint = new jaws.Sprite({image: paint_sheet.frames[4], x:jaws.width-50, y:200, anchor: "center"})
+        paint.onFrame = paint_sheet.frames[5]
+        paint.offFrame = paint_sheet.frames[4]
+        paint.colour = "green"
+        
+        paints.push( paint )
+        
+        var paint = new jaws.Sprite({image: paint_sheet.frames[6], x:jaws.width-50, y:270, anchor: "center"})
+        paint.onFrame = paint_sheet.frames[7]
+        paint.offFrame = paint_sheet.frames[6]
+        paint.colour = "blue"
+        
+        paints.push( paint )
+        
+        var paint = new jaws.Sprite({image: paint_sheet.frames[8], x:jaws.width-50, y:340, anchor: "center"})
+        paint.onFrame = paint_sheet.frames[9]
+        paint.offFrame = paint_sheet.frames[8]
+        paint.colour = "yellow"
+        
+        paints.push( paint )
+        
+        target_coverage = Math.floor(Math.random() * 25) + 1
+        
+        
+        this.update_coverage = function()
         {
             var coverage = painting_context.get_coverage()
             
@@ -115,16 +259,56 @@ function Easel()
             
             sidebar_context.restore()
             
-            //check to see if won
+            if (coverage == target_coverage)
+            {
+                //jaws.switchGameState(IntroMenu)
+            }
         }
-        
-        
+        jaws.canvas.addEventListener("touchend", this.update_coverage, false);
+        this.update_coverage()
+    }
+    
+    this.update = function()
+    {
+        fps.innerHTML = jaws.game_loop.fps
+        if (jaws.pressed("left_mouse_button"))
+        {
+            painting_context.save()
+            painting_context.translate(-painting_sprite.x, -painting_sprite.y)
+            painting_context.beginPath()
+            painting_context.fillStyle = current_colour
+            var radius = 4
+            if (current_colour == "white")
+            {
+                radius = 10
+            }
+            painting_context.arc(jaws.mouse_x, jaws.mouse_y, radius, 0, 2 * Math.PI, false)
+            painting_context.fill()
+            painting_context.restore()
+            
+            var point = {}
+            point.rect = function() { return new jaws.Rect(jaws.mouse_x, jaws.mouse_y, 10, 10)}
+            var paint_hit = jaws.collideOneWithMany(point, paints.sprites)
+            if (paint_hit.length > 0)
+            {
+                current_colour = paint_hit[0].colour
+                paints.forEach(function(element, index, array)
+                {
+                    element.setImage(element.offFrame)
+                })
+                paint_hit[0].setImage(paint_hit[0].onFrame)
+            }
+        }
     }
     
     this.draw = function()
     {
+        jaws.clear()
+        easel.draw()
         painting_sprite.draw()
         sidebar_sprite.draw()
+        
+        paints.draw()
     }
     
 }
@@ -140,7 +324,10 @@ function IntroMenu()
     
     this.update = function()
     {
-    
+        if (jaws.pressed("left_mouse_button"))
+        {
+            jaws.switchGameState(Easel, {fps:120})
+        }
     }
 
     this.draw = function()

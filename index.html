@@ -8,7 +8,7 @@
 
 <script src="game.js"></script>
 
-<script id="FirebugLite" src="https://getfirebug.com/firebug-lite-debug.js#startOpened" firebuglite="4"></script>
+<!--<script id="FirebugLite" src="lib/firebug-lite-debug.js#startOpened" firebuglite="4"></script>-->
 
 <style type="text/css">
 
@@ -34,7 +34,7 @@
 <body>
 
 <canvas width="820" height="480" style="background:white;"></canvas>
-
+<span id="fps" style="display:block"></span>
 <h1>MalphasWats - Ludum Dare #26</h1>
 
 
@@ -43,8 +43,10 @@
     {
         //jaws.assets.bust_cache=true
         
-        jaws.assets.add(["graphics/easel.png", "graphics/bryan.png"])
-        jaws.start(Easel, {fps:120})
+        jaws.assets.add(["graphics/easel.png", "graphics/bryan.png", "graphics/paint.png"])
+        //jaws.start(IntroMenu)
+        //jaws.start(Easel, {fps:120})
+        jaws.start(Renown, {fps:1})
     }
 </script>
 

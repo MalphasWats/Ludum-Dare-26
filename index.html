@@ -35,19 +35,14 @@
 <body>
 
 <canvas width="820" height="480" style="background:white;"></canvas>
-<span id="fps" style="display:block"></span>
-<h1>MalphasWats - Ludum Dare #26</h1>
+<h1>The Minimalist - Ludum Dare #26</h1>
 
 
 <script>
     jaws.onload = function()
     {
-        //jaws.assets.bust_cache=true
-        
-        jaws.assets.add(["graphics/easel.png", "graphics/bryan.png", "graphics/paint.png"])
+        jaws.assets.add(["graphics/easel.png", "graphics/bryan.png", "graphics/paint.png", "graphics/icons.png"])
         jaws.start(IntroMenu, {fps:30}, {test:"value"})
-        //jaws.start(Easel, {fps:120})
-        //jaws.start(Renown, {fps:60})
     }
 </script>
 

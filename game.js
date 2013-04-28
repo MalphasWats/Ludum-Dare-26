@@ -6,14 +6,18 @@ var cash = 50
 
 var days_left = 31
 
+var gallery
+
 function Renown()
 {
     var sidebar, sidebar_context, sidebar_sprite
     
+    var message_sprite
+    
     var actions
     var timer = 100
     
-    this.setup = function()
+    this.setup = function(param)
     {
         sidebar = document.createElement('canvas')
         sidebar.width = 120
@@ -39,13 +43,18 @@ function Renown()
         
         actions = new jaws.SpriteList()
         
+        var icons = new jaws.SpriteSheet({image: "graphics/icons.png", frame_size: [16,16], scale_image: 4})
+        
         var button = document.createElement('canvas')
         button.width = 350
-        button.height = 60
+        button.height = 70
         var context = button.getContext('2d')
         
         context.fillStyle = "#cdcdcd"
         context.fillRect(0,0, button.width, button.height)
+        
+        var icon = new jaws.Sprite({image: icons.frames[0], x:0, y:0})
+        context.drawImage(icon.image, 10, 5, 64, 64)
         
         context.textAlign  = "Left"
         context.fillStyle  = "black"
@@ -60,11 +69,14 @@ function Renown()
         
         var button = document.createElement('canvas')
         button.width = 350
-        button.height = 60
+        button.height = 70
         var context = button.getContext('2d')
         
         context.fillStyle = "#cdcdcd"
         context.fillRect(0,0, button.width, button.height)
+        
+        var icon = new jaws.Sprite({image: icons.frames[1], x:0, y:0})
+        context.drawImage(icon.image, 10, 5, 64, 64)
         
         context.textAlign  = "Left"
         context.fillStyle  = "black"
@@ -82,11 +94,14 @@ function Renown()
         
         var button = document.createElement('canvas')
         button.width = 350
-        button.height = 60
+        button.height = 70
         var context = button.getContext('2d')
         
         context.fillStyle = "#cdcdcd"
         context.fillRect(0,0, button.width, button.height)
+        
+        var icon = new jaws.Sprite({image: icons.frames[2], x:0, y:0})
+        context.drawImage(icon.image, 10, 5, 64, 64)
         
         context.textAlign  = "Left"
         context.fillStyle  = "black"
@@ -96,6 +111,24 @@ function Renown()
         var sprite = new jaws.Sprite({image: button, x:200, y:220})
         sprite.action = "graffitto"
         actions.push(sprite)
+        
+        var message = document.createElement('canvas')
+        message.width = 600
+        message.height = 120
+        var message_context = message.getContext('2d')
+        
+        message_context.textAlign  = "Left"
+        message_context.fillStyle  = "black"
+        message_context.font       = "bold 18px Terminal"
+        
+        var message_text = ""
+        if (param.message)
+        {
+            message_text = param.message
+        }
+        
+        message_context.fillText(message_text,0,20)
+        message_sprite = new jaws.Sprite({image: message, x:220, y:380})
     }
     
     this.update = function()
@@ -174,6 +207,7 @@ function Renown()
         jaws.clear()
         sidebar_sprite.draw()
         actions.draw()
+        message_sprite.draw()
     }
 
 }
@@ -196,8 +230,7 @@ function Easel()
     {
         renown_to_win = params.renown
         cash_to_win = params.cash
-    
-        fps =document.getElementById("fps")
+        
         jaws.context.mozImageSmoothingEnabled = false;
         
         var title = document.createElement('canvas')
@@ -222,6 +255,7 @@ function Easel()
         painting_context = painting.getContext('2d')
         
         painting_sprite = new jaws.Sprite({image: painting, x:195, y:65})
+        painting_sprite.title = params.title
         
         painting_context.get_coverage = function()
         {
@@ -306,7 +340,7 @@ function Easel()
         
         paints.push( paint )
         
-        target_coverage = Math.floor(Math.random() * 25) + 1
+        target_coverage = Math.floor(Math.random() * 15) + 1
         
         
         painting.update_coverage = function()
@@ -332,28 +366,46 @@ function Easel()
             {
                 days_left -= 2
                 var happiness = (Math.floor(Math.random() * 10) + 1)
+                var message
                 if (happiness > 1)
                 {
                     cash += cash_to_win
                     renown += renown_to_win
+                    if (cash_to_win == 0)
+                    {
+                        message = "Awesome, that bridge totally looks better now."
+                    }
+                    else {message = "Good work, they loved it!"}
                 }
                 else 
                 {
                     if (cash_to_win < 0)
                     {
-                        renown += Math.round(renown_to_win/2)
+                        renown -= Math.round(renown_to_win/2)
                         cash += cash_to_win
+                        
+                        message = "Ouch, no-one came. Except that snooty Critic..."
                     }
-                    else {renown -= Math.round(renown_to_win/2)}
+                    else if (cash_to_win == 0)
+                    {
+                        renown += 50
+                        message = "Ha! You got caught tagging! The papers say you're the minimalist Banksy."
+                    }
+                    else 
+                    {
+                        renown -= 1
+                        message = "They hated it, so sad."
+                    }
                 }
-                jaws.switchGameState(Renown)
+                gallery.push(new jaws.Sprite({image:painting_sprite.image, x:0, y:0}))
+                
+                jaws.switchGameState(Renown, {fps:60}, {message:message})
             }
         }
     }
     
     this.update = function()
     {
-        fps.innerHTML = jaws.game_loop.fps
         if (jaws.pressed("left_mouse_button"))
         {
             painting.changing = true
@@ -412,16 +464,33 @@ function Easel()
 
 function IntroMenu()
 {
+    var pressing = false
+    var sprites
+    
     this.setup = function()
     {
+        gallery = []
+        var icons = new jaws.SpriteSheet({image: "graphics/icons.png", frame_size: [16,16], scale_image: 4})
         
+        sprites = new jaws.SpriteList()
+        
+        sprites.push(new jaws.Sprite({image: icons.frames[0], x:600, y:270}))
+        
+        sprites.push(new jaws.Sprite({image: icons.frames[3], x:670, y:200}))
+        
+        sprites.push(new jaws.Sprite({image: "graphics/bryan.png", x:600, y:200, scale_image:4}))
     }
     
     this.update = function()
     {
         if (jaws.pressed("left_mouse_button"))
         {
-            jaws.switchGameState(Renown, {fps:60})
+            pressing = true
+        }
+        else if (pressing)
+        {
+            pressing = false
+            jaws.switchGameState(Renown, {fps:60}, {message:"Choose an action to begin."})
         }
     }
 
@@ -434,7 +503,11 @@ function IntroMenu()
         jaws.context.fillStyle  = "black"
         jaws.context.font       = "bold 20px terminal";
         jaws.context.fillText("The Minimalist", 120, 100);
+        
+        jaws.context.fillText("Press anywhere to begin", 180, 150);
         jaws.context.restore()
+        
+        sprites.draw()
 
     }
 }
@@ -442,9 +515,12 @@ function IntroMenu()
 
 function GameWon()
 {
+    var art
+    
     this.setup = function()
     {
-        
+        art = gallery[Math.floor(Math.random() * gallery.length)]
+        art.moveTo(250, 110)
     }
     
     this.update = function()
@@ -460,8 +536,10 @@ function GameWon()
         jaws.context.textAlign  = "left"
         jaws.context.fillStyle  = "black"
         jaws.context.font       = "bold 20px terminal";
-        jaws.context.fillText("Congratulations! You are The Minimalist!", 120, 100);
+        jaws.context.fillText("Congratulations! You are The Minimalist!", 120, 80);
         jaws.context.restore()
+        
+        art.draw()
     }
 }
 

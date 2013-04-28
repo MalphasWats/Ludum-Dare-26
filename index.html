@@ -6,9 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <script src="lib/jaws.js"></script>
 
+<script src="themes.js"></script>
 <script src="game.js"></script>
 
-<!--<script id="FirebugLite" src="lib/firebug-lite-debug.js#startOpened" firebuglite="4"></script>-->
+<script id="FirebugLite" src="lib/firebug-lite-debug.js#startOpened" firebuglite="4"></script>
 
 <style type="text/css">
 
@@ -44,9 +45,9 @@
         //jaws.assets.bust_cache=true
         
         jaws.assets.add(["graphics/easel.png", "graphics/bryan.png", "graphics/paint.png"])
-        //jaws.start(IntroMenu)
+        jaws.start(IntroMenu, {fps:30}, {test:"value"})
         //jaws.start(Easel, {fps:120})
-        jaws.start(Renown, {fps:1})
+        //jaws.start(Renown, {fps:60})
     }
 </script>
 
